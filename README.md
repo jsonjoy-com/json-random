@@ -1,4 +1,4 @@
-# @jsonjoy.com/json-random
+# `json-random`
 
 
 ## Use Cases
