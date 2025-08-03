@@ -9,16 +9,29 @@ export type TemplateNode =
   | LiteralTemplate
   | NumberTemplate
   | IntegerTemplate
+  | Int64Template
   | FloatTemplate
   | StringTemplate
   | BooleanTemplate
+  | BinTemplate
   | NullTemplate
   | ArrayTemplate
   | ObjectTemplate
   | MapTemplate
   | OrTemplate;
 
-export type TemplateShorthand = 'num' | 'int' | 'float' | 'str' | 'bool' | 'nil' | 'arr' | 'obj' | 'map';
+export type TemplateShorthand =
+  | 'num'
+  | 'int'
+  | 'int64'
+  | 'float'
+  | 'str'
+  | 'bool'
+  | 'bin'
+  | 'nil'
+  | 'arr'
+  | 'obj'
+  | 'map';
 
 /**
  * Recursive reference allows for recursive template construction, for example:
@@ -60,6 +73,12 @@ export type NumberTemplate = [type: 'num', min?: number, max?: number];
 export type IntegerTemplate = [type: 'int', min?: number, max?: number];
 
 /**
+ * 64-bit integer template. Generates a random bigint within the specified range.
+ * If no range is specified, it defaults to a reasonable range for 64-bit integers.
+ */
+export type Int64Template = [type: 'int64', min?: bigint, max?: bigint];
+
+/**
  * Float template. Generates a random floating-point number within the specified
  * range. If no range is specified, it defaults to the full range of JavaScript
  * floating-point numbers.
@@ -79,6 +98,30 @@ export type StringTemplate = [type: 'str', token?: Token];
  * `true` or `false`.
  */
 export type BooleanTemplate = [type: 'bool', value?: boolean];
+
+/**
+ * Binary template. Generates a random Uint8Array. The template allows
+ * specifying the length of binary data and the range of values in each octet.
+ */
+export type BinTemplate = [
+  type: 'bin',
+  /**
+   * The minimum length of binary data. Defaults to 0.
+   */
+  min?: number,
+  /**
+   * The maximum length of binary data. Defaults to 5.
+   */
+  max?: number,
+  /**
+   * The minimum octet value. Defaults to 0.
+   */
+  omin?: number,
+  /**
+   * The maximum octet value. Defaults to 255.
+   */
+  omax?: number,
+];
 
 /**
  * Null template. Generates a `null` value. If a specific value is provided, it

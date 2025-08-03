@@ -1,12 +1,14 @@
-import {int} from '../number';
+import {int, int64} from '../number';
 import {randomString} from '../string';
 import {clone} from '../util';
 import * as templates from './templates';
 import type {
   ArrayTemplate,
+  BinTemplate,
   BooleanTemplate,
   FloatTemplate,
   IntegerTemplate,
+  Int64Template,
   LiteralTemplate,
   MapTemplate,
   NumberTemplate,
@@ -66,10 +68,14 @@ export class TemplateJson {
         return this.generateNumber(template as NumberTemplate);
       case 'int':
         return this.generateInteger(template as IntegerTemplate);
+      case 'int64':
+        return this.generateInt64(template as Int64Template);
       case 'float':
         return this.generateFloat(template as FloatTemplate);
       case 'bool':
         return this.generateBoolean(template as BooleanTemplate);
+      case 'bin':
+        return this.generateBin(template as BinTemplate);
       case 'nil':
         return null;
       case 'lit':
@@ -141,6 +147,11 @@ export class TemplateJson {
     return int(min, max);
   }
 
+  protected generateInt64(template: Int64Template): bigint {
+    const [, min = BigInt('-9223372036854775808'), max = BigInt('9223372036854775807')] = template;
+    return int64(min, max);
+  }
+
   protected generateFloat(template: FloatTemplate): number {
     const [, min = -Number.MAX_VALUE, max = Number.MAX_VALUE] = template;
     let float = Math.random() * (max - min) + min;
@@ -151,6 +162,16 @@ export class TemplateJson {
   protected generateBoolean(template: BooleanTemplate): boolean {
     const value = template[1];
     return value !== undefined ? value : Math.random() < 0.5;
+  }
+
+  protected generateBin(template: BinTemplate): Uint8Array {
+    const [, min = 0, max = 5, omin = 0, omax = 255] = template;
+    const length = this.minmax(min, max);
+    const result = new Uint8Array(length);
+    for (let i = 0; i < length; i++) {
+      result[i] = int(omin, omax);
+    }
+    return result;
   }
 
   protected generateLiteral(template: LiteralTemplate): unknown {
