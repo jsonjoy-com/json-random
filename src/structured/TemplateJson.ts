@@ -1,4 +1,4 @@
-import {int} from '../number';
+import {int, int64} from '../number';
 import {randomString} from '../string';
 import {clone} from '../util';
 import * as templates from './templates';
@@ -8,6 +8,7 @@ import type {
   BooleanTemplate,
   FloatTemplate,
   IntegerTemplate,
+  Int64Template,
   LiteralTemplate,
   MapTemplate,
   NumberTemplate,
@@ -67,6 +68,8 @@ export class TemplateJson {
         return this.generateNumber(template as NumberTemplate);
       case 'int':
         return this.generateInteger(template as IntegerTemplate);
+      case 'int64':
+        return this.generateInt64(template as Int64Template);
       case 'float':
         return this.generateFloat(template as FloatTemplate);
       case 'bool':
@@ -142,6 +145,11 @@ export class TemplateJson {
   protected generateInteger(template: IntegerTemplate): number {
     const [, min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER] = template;
     return int(min, max);
+  }
+
+  protected generateInt64(template: Int64Template): bigint {
+    const [, min = BigInt('-9223372036854775808'), max = BigInt('9223372036854775807')] = template;
+    return int64(min, max);
   }
 
   protected generateFloat(template: FloatTemplate): number {

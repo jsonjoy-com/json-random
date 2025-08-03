@@ -48,6 +48,70 @@ describe('TemplateJson', () => {
     });
   });
 
+  describe('int64', () => {
+    test('uses default int64 schema, if not provided', () => {
+      resetMathRandom();
+      const result = TemplateJson.gen('int64') as bigint;
+      expect(typeof result).toBe('bigint');
+      expect(result >= BigInt('-9223372036854775808')).toBe(true);
+      expect(result <= BigInt('9223372036854775807')).toBe(true);
+    });
+
+    test('can specify int64 range', () => {
+      resetMathRandom();
+      expect(TemplateJson.gen(['int64', BigInt(-10), BigInt(10)])).toBe(BigInt(-9));
+      expect(TemplateJson.gen(['int64', BigInt(0), BigInt(1)])).toBe(BigInt(0));
+      expect(TemplateJson.gen(['int64', BigInt(1), BigInt(5)])).toBe(BigInt(4));
+    });
+
+    test('handles edge cases', () => {
+      resetMathRandom();
+      expect(TemplateJson.gen(['int64', BigInt(0), BigInt(0)])).toBe(BigInt(0));
+      expect(TemplateJson.gen(['int64', BigInt(-1), BigInt(-1)])).toBe(BigInt(-1));
+      expect(TemplateJson.gen(['int64', BigInt('1000000000000'), BigInt('1000000000000')])).toBe(
+        BigInt('1000000000000'),
+      );
+    });
+
+    test('handles very large ranges', () => {
+      resetMathRandom();
+      const result = TemplateJson.gen([
+        'int64',
+        BigInt('-9223372036854775808'),
+        BigInt('9223372036854775807'),
+      ]) as bigint;
+      expect(typeof result).toBe('bigint');
+      expect(result >= BigInt('-9223372036854775808')).toBe(true);
+      expect(result <= BigInt('9223372036854775807')).toBe(true);
+    });
+
+    test('can be used in complex structures', () => {
+      resetMathRandom();
+      const template: any = [
+        'obj',
+        [
+          ['id', 'int64'],
+          ['timestamp', ['int64', BigInt('1000000000000'), BigInt('9999999999999')]],
+        ],
+      ];
+      const result = TemplateJson.gen(template) as any;
+      expect(typeof result).toBe('object');
+      expect(typeof result.id).toBe('bigint');
+      expect(typeof result.timestamp).toBe('bigint');
+      expect(result.timestamp >= BigInt('1000000000000')).toBe(true);
+      expect(result.timestamp <= BigInt('9999999999999')).toBe(true);
+    });
+
+    test('works with or templates', () => {
+      resetMathRandom();
+      const result = TemplateJson.gen(['or', 'int', 'int64', 'str']);
+      const isBigInt = typeof result === 'bigint';
+      const isNumber = typeof result === 'number';
+      const isString = typeof result === 'string';
+      expect(isBigInt || isNumber || isString).toBe(true);
+    });
+  });
+
   describe('num', () => {
     test('generates random number, without range', () => {
       resetMathRandom();
@@ -527,13 +591,16 @@ describe('TemplateJson', () => {
         [
           ['name', 'str'],
           ['data', ['bin', 3, 3]],
-          ['metadata', [
-            'obj',
+          [
+            'metadata',
             [
-              ['hash', ['bin', 32, 32]],
-              ['signature', ['bin', 64, 64, 0, 127]],
+              'obj',
+              [
+                ['hash', ['bin', 32, 32]],
+                ['signature', ['bin', 64, 64, 0, 127]],
+              ],
             ],
-          ]],
+          ],
         ],
       ];
       const result = TemplateJson.gen(template) as any;

@@ -9,6 +9,7 @@ export type TemplateNode =
   | LiteralTemplate
   | NumberTemplate
   | IntegerTemplate
+  | Int64Template
   | FloatTemplate
   | StringTemplate
   | BooleanTemplate
@@ -19,7 +20,18 @@ export type TemplateNode =
   | MapTemplate
   | OrTemplate;
 
-export type TemplateShorthand = 'num' | 'int' | 'float' | 'str' | 'bool' | 'bin' | 'nil' | 'arr' | 'obj' | 'map';
+export type TemplateShorthand =
+  | 'num'
+  | 'int'
+  | 'int64'
+  | 'float'
+  | 'str'
+  | 'bool'
+  | 'bin'
+  | 'nil'
+  | 'arr'
+  | 'obj'
+  | 'map';
 
 /**
  * Recursive reference allows for recursive template construction, for example:
@@ -59,6 +71,12 @@ export type NumberTemplate = [type: 'num', min?: number, max?: number];
  * If no range is specified, it defaults to the full range of JavaScript integers.
  */
 export type IntegerTemplate = [type: 'int', min?: number, max?: number];
+
+/**
+ * 64-bit integer template. Generates a random bigint within the specified range.
+ * If no range is specified, it defaults to a reasonable range for 64-bit integers.
+ */
+export type Int64Template = [type: 'int64', min?: bigint, max?: bigint];
 
 /**
  * Float template. Generates a random floating-point number within the specified
