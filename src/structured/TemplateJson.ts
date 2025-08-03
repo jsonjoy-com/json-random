@@ -1,22 +1,8 @@
-import {int} from '../number';
-import {randomString} from '../string';
-import {clone} from '../util';
-import * as templates from './templates';
-import type {
-  ArrayTemplate,
-  BooleanTemplate,
-  FloatTemplate,
-  IntegerTemplate,
-  LiteralTemplate,
-  MapTemplate,
-  NumberTemplate,
-  ObjectTemplate,
-  OrTemplate,
-  StringTemplate,
-  Template,
-  TemplateNode,
-  TemplateShorthand,
-} from './types';
+import {int} from "../number";
+import {randomString} from "../string";
+import {clone} from "../util";
+import * as templates from "./templates";
+import type {ArrayTemplate, BooleanTemplate, FloatTemplate, IntegerTemplate, LiteralTemplate, MapTemplate, NumberTemplate, ObjectTemplate, OrTemplate, StringTemplate, Template, TemplateNode, TemplateShorthand} from "./types";
 
 export interface TemplateJsonOpts {
   /**
@@ -37,10 +23,7 @@ export class TemplateJson {
   protected nodes: number = 0;
   protected maxNodes: number;
 
-  constructor(
-    public readonly template: Template = templates.nil,
-    public readonly opts: TemplateJsonOpts = {},
-  ) {
+  constructor(public readonly template: Template = templates.nil, public readonly opts: TemplateJsonOpts = {}) {
     this.maxNodes = opts.maxNodes ?? 100;
   }
 
@@ -51,31 +34,7 @@ export class TemplateJson {
   protected generate(tpl: Template): unknown {
     this.nodes++;
     while (typeof tpl === 'function') tpl = tpl();
-    if (typeof tpl === 'string') {
-      switch (tpl) {
-        case 'arr':
-          return this.generateArray(['arr']);
-        case 'obj':
-          return this.generateObject(['obj']);
-        case 'map':
-          return this.generateMap(['map', null]);
-        case 'str':
-          return this.generateString(['str']);
-        case 'num':
-          return this.generateNumber(['num']);
-        case 'int':
-          return this.generateInteger(['int']);
-        case 'float':
-          return this.generateFloat(['float']);
-        case 'bool':
-          return this.generateBoolean(['bool']);
-        case 'nil':
-          return null;
-        default:
-          throw new Error(`Unknown template shorthand: ${tpl}`);
-      }
-    }
-    const template: TemplateNode = tpl;
+    const template: TemplateNode = typeof tpl === 'string' ? [tpl] : tpl;
     const type = template[0];
     switch (type) {
       case 'arr':
@@ -142,8 +101,9 @@ export class TemplateJson {
     const [, keyToken, valueTemplate = 'nil', min = 0, max = 5] = template;
     const length = this.minmax(min, max);
     const result: Record<string, unknown> = {};
+    const token = keyToken ?? templates.tokensObjectKey;
     for (let i = 0; i < length; i++) {
-      const key = randomString(keyToken ?? templates.tokensObjectKey);
+      const key = randomString(token);
       const value = this.generate(valueTemplate);
       result[key] = value;
     }
@@ -155,7 +115,7 @@ export class TemplateJson {
   }
 
   protected generateNumber([, min, max]: NumberTemplate): number {
-    if (Math.random() > 0.5) return this.generateInteger(['int', min, max]);
+    if (Math.random() > .5) return this.generateInteger(['int', min, max]);
     else return this.generateFloat(['float', min, max]);
   }
 

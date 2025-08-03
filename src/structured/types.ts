@@ -3,7 +3,10 @@ import type {Token} from '../string';
 /**
  * Schema (template) for random JSON generation.
  */
-export type Template = TemplateShorthand | TemplateNode | TemplateRecursiveReference;
+export type Template =
+  | TemplateShorthand
+  | TemplateNode
+  | TemplateRecursiveReference;
 
 export type TemplateNode =
   | LiteralTemplate
@@ -164,10 +167,10 @@ export type ObjectTemplateField = [
 export type MapTemplate = [
   type: 'map',
   /**
-   * Token to use for generating the keys of the map. If `null`, the default
-   * key {@link Token} will be used.
+   * Token to use for generating the keys of the map. If `null` or not set,
+   * the default key {@link Token} will be used.
    */
-  key: Token | null,
+  key?: Token | null,
   /**
    * The template for the value of the map. If not specified, the default
    * template will be used.

@@ -319,8 +319,7 @@ describe('TemplateJson', () => {
     });
 
     test('handles complex nested templates', () => {
-      resetMathRandom();
-      const map = TemplateJson.gen([
+      const map = deterministic(12345789, () => TemplateJson.gen([
         'map',
         ['list', 'user_', ['pick', '1', '2', '3']],
         [
@@ -330,8 +329,8 @@ describe('TemplateJson', () => {
             ['age', 'int'],
           ],
         ],
-      ]) as Record<string, unknown>;
-
+      ])) as Record<string, unknown>;
+      console.log(map);
       expect(typeof map).toBe('object');
       const keys = Object.keys(map);
       for (const key of keys) {
