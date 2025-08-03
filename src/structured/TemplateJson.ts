@@ -1,6 +1,6 @@
 import {randomString} from "../string";
 import * as templates from "./templates";
-import {ArrayTemplate, BooleanTemplate, NumberTemplate, ObjectTemplate, StringTemplate, Template, TemplateNode} from "./types";
+import {ArrayTemplate, BooleanTemplate, FloatTemplate, IntegerTemplate, NumberTemplate, ObjectTemplate, StringTemplate, Template, TemplateNode} from "./types";
 
 export interface TemplateJsonOpts {
   maxNodeCount?: number;
@@ -37,6 +37,10 @@ export class TemplateJson {
         return this.generateString(template as StringTemplate);
       case 'num':
         return this.generateNumber(template as NumberTemplate);
+      case 'int':
+        return this.generateInteger(template as IntegerTemplate);
+      case 'float':
+        return this.generateFloat(template as FloatTemplate);
       case 'bool':
         return this.generateBoolean(template as BooleanTemplate);
       case 'nil':
@@ -59,6 +63,17 @@ export class TemplateJson {
   }
 
   protected generateNumber(template: NumberTemplate): number {
+    throw new Error('not implemented');
+  }
+
+  protected generateInteger(template: IntegerTemplate): number {
+    const [, min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER] = template;
+    let int = Math.round(Math.random() * (max - min) + min);
+    int = Math.max(Number.MIN_SAFE_INTEGER, Math.min(Number.MAX_SAFE_INTEGER, int));
+    return int;
+  }
+
+  protected generateFloat(template: FloatTemplate): number {
     throw new Error('not implemented');
   }
 

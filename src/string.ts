@@ -58,7 +58,7 @@ export function randomString(token: Token): string {
       return String.fromCodePoint(codePoint);
     }
     case 'list':
-      const [_, ...list] = token;
+      const [, ...list] = token;
       return list.map(randomString).join('');
     default:
       throw new Error('Invalid token type');
