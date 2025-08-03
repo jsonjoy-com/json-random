@@ -5,7 +5,8 @@ import {Token} from "../string";
  */
 export type Template =
   | TemplateShorthand
-  | TemplateNode;
+  | TemplateNode
+  | TemplateRecursiveReference;
 
 export type TemplateNode =
   | LiteralTemplate
@@ -20,6 +21,27 @@ export type TemplateNode =
   | OrTemplate;
 
 export type TemplateShorthand = 'num' | 'int' | 'float' | 'str' | 'bool' | 'nil' | 'arr' | 'obj';
+
+/**
+ * Recursive reference allows for recursive template construction, for example:
+ *
+ * ```ts
+ * const user = (): Template => ['obj', [
+ *   ['id', ['str', ['repeat', 4, 8, ['pick', ...'0123456789'.split('')]]]],
+ *   ['friend', user, .2] // <--- Probability 20%
+ * ]];
+ * ```
+ *
+ * The above corresponds to:
+ *
+ * ```ts
+ * interface User {
+ *   id: string;
+ *   friend?: User; // <--- Recursive
+ * }
+ * ```
+ */
+export type TemplateRecursiveReference = () => Template;
 
 /**
  * Literal value template. The literal value is deeply cloned when generating

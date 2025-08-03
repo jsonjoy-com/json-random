@@ -1,10 +1,17 @@
+import {int} from "../number";
 import {randomString} from "../string";
 import {clone} from "../util";
 import * as templates from "./templates";
-import type {ArrayTemplate, BooleanTemplate, FloatTemplate, IntegerTemplate, LiteralTemplate, NumberTemplate, ObjectTemplate, OrTemplate, StringTemplate, Template, TemplateNode} from "./types";
+import type {ArrayTemplate, BooleanTemplate, FloatTemplate, IntegerTemplate, LiteralTemplate, NumberTemplate, ObjectTemplate, OrTemplate, StringTemplate, Template, TemplateNode, TemplateShorthand} from "./types";
 
 export interface TemplateJsonOpts {
-  maxNodeCount?: number;
+  /**
+   * Sets the limit of maximum number of JSON nodes to generate. This is a soft
+   * limit: once this limit is reached, no further optional values are generate
+   * (optional object and map keys are not generated, arrays are generated with
+   * their minimum required size).
+   */
+  maxNodes?: number;
 }
 
 export class TemplateJson {
@@ -17,7 +24,7 @@ export class TemplateJson {
   protected maxNodes: number;
 
   constructor(public readonly template: Template = templates.nil, public readonly opts: TemplateJsonOpts = {}) {
-    this.maxNodes = opts.maxNodeCount ?? 100;
+    this.maxNodes = opts.maxNodes ?? 100;
   }
 
   public gen(): unknown {
@@ -25,8 +32,8 @@ export class TemplateJson {
   }
 
   protected generate(tpl: Template): unknown {
-    if (this.nodes >= this.maxNodes) return null;
     this.nodes++;
+    while (typeof tpl === 'function') tpl = tpl();
     const template: TemplateNode = typeof tpl === 'string' ? [tpl] : tpl;
     const type = template[0];
     switch (type) {
@@ -55,13 +62,19 @@ export class TemplateJson {
     }
   }
 
+  protected minmax(min: number, max: number): number {
+    if (this.nodes > this.maxNodes) return min;
+    if (this.nodes + max > this.maxNodes) max = this.maxNodes - this.nodes;
+    if (max < min) max = min;
+    return int(min, max);
+  }
+
   protected generateArray(template: ArrayTemplate): unknown[] {
     const [, min = 0, max = 5, itemTemplate = 'nil', head = [], tail = []] = template;
-    const length = Math.floor(Math.random() * (max - min + 1)) + min;
+    const length = this.minmax(min, max);
     const result: unknown[] = [];
     for (const tpl of head) result.push(this.generate(tpl));
-    const mainCount = Math.max(0, length - head.length - tail.length);
-    for (let i = 0; i < mainCount; i++) result.push(this.generate(itemTemplate));
+    for (let i = 0; i < length; i++) result.push(this.generate(itemTemplate));
     for (const tpl of tail) result.push(this.generate(tpl));
     return result;
   }
@@ -71,8 +84,11 @@ export class TemplateJson {
     const result: Record<string, unknown> = {};
     for (const field of fields) {
       const [keyToken, valueTemplate = 'nil', optionality = 0] = field;
-      if (optionality && Math.random() < optionality) continue;
-      const key = randomString(keyToken ?? templates.tokensHelloWorld);
+      if (optionality) {
+        if (this.nodes > this.maxNodes) continue;
+        if (Math.random() < optionality) continue;
+      }
+      const key = randomString(keyToken ?? templates.tokensObjectKey);
       const value = this.generate(valueTemplate);
       result[key] = value;
     }
@@ -90,31 +106,28 @@ export class TemplateJson {
 
   protected generateInteger(template: IntegerTemplate): number {
     const [, min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER] = template;
-    let int = Math.round(Math.random() * (max - min) + min);
-    int = Math.max(Number.MIN_SAFE_INTEGER, Math.min(Number.MAX_SAFE_INTEGER, int));
-    return int;
+    return int(min, max);
   }
 
   protected generateFloat(template: FloatTemplate): number {
     const [, min = -Number.MAX_VALUE, max = Number.MAX_VALUE] = template;
     let float = Math.random() * (max - min) + min;
-    float = Math.max(-Number.MAX_VALUE, Math.min(Number.MAX_VALUE, float));
+    float = Math.max(min, Math.min(max, float));
     return float;
   }
 
   protected generateBoolean(template: BooleanTemplate): boolean {
-    const [, value] = template;
+    const value = template[1];
     return value !== undefined ? value : Math.random() < 0.5;
   }
 
   protected generateLiteral(template: LiteralTemplate): unknown {
-    const [, value] = template;
-    return clone(value);
+    return clone(template[1]);
   }
 
   protected generateOr(template: OrTemplate): unknown {
     const [, ...options] = template;
-    const randomIndex = Math.floor(Math.random() * options.length);
-    return this.generate(options[randomIndex]);
+    const index = int(0, options.length - 1);
+    return this.generate(options[index]);
   }
 }

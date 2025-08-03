@@ -1,6 +1,7 @@
 import {resetMathRandom} from "../../__tests__/setup";
 import {deterministic} from "../../util";
 import {TemplateJson} from "../TemplateJson";
+import {Template} from "../types";
 
 describe('TemplateJson', () => {
   describe('str', () => {
@@ -14,13 +15,13 @@ describe('TemplateJson', () => {
 
     test('generates string according to schema', () => {
       resetMathRandom();
-      const str = TemplateJson.gen(['str', ['pick', ['foo', 'bar', 'baz']]]);
+      const str = TemplateJson.gen(['str', ['pick', 'foo', 'bar', 'baz']]);
       expect(str).toBe('foo');
     });
 
     test('handles complex string tokens', () => {
       resetMathRandom();
-      const str = TemplateJson.gen(['str', ['list', 'prefix-', ['pick', ['a', 'b']], '-suffix']]);
+      const str = TemplateJson.gen(['str', ['list', 'prefix-', ['pick', 'a', 'b'], '-suffix']]);
       expect(str).toBe('prefix-a-suffix');
     });
   });
@@ -225,7 +226,7 @@ describe('TemplateJson', () => {
     test('can use token for key generation', () => {
       resetMathRandom();
       const obj = TemplateJson.gen(['obj', [
-        [['pick', ['key1', 'key2']], 'str']
+        [['pick', 'key1', 'key2'], 'str']
       ]]);
       expect(typeof obj).toBe('object');
       const keys = Object.keys(obj as any);
@@ -265,15 +266,15 @@ describe('TemplateJson', () => {
 
   describe('maxNodeCount', () => {
     test('respects node count limit', () => {
-      const result = TemplateJson.gen(['arr', 100, 100, 'str'], { maxNodeCount: 5 });
+      const result = TemplateJson.gen(['arr', 1, 100, 'str'], { maxNodes: 5 }) as any[];
       expect(Array.isArray(result)).toBe(true);
-      const arr = result as any[];
-      expect(arr.some(item => item === null)).toBe(true);
+      expect(result.length > 2).toBe(true);
+      expect(result.length < 10).toBe(true);
     });
 
     test('works with nested structures', () => {
       const template: any = ['arr', 3, 3, ['obj', [['key', 'str']]]];
-      const result = TemplateJson.gen(template, { maxNodeCount: 10 });
+      const result = TemplateJson.gen(template, { maxNodes: 10 });
       expect(Array.isArray(result)).toBe(true);
     });
   });
@@ -314,6 +315,60 @@ describe('TemplateJson', () => {
       const result = TemplateJson.gen(['int', Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER]);
       expect(typeof result).toBe('number');
       expect(Number.isInteger(result)).toBe(true);
+    });
+  });
+});
+
+describe('recursive templates', () => {
+  test('handles recursive structures', () => {
+    const user = (): Template => ['obj', [
+      ['id', ['str', ['repeat', 4, 8, ['pick', ...'0123456789'.split('')]]]],
+      ['friend', user, .2]
+    ]];
+    const result = deterministic(123, () => TemplateJson.gen(user));
+    expect(result).toEqual({
+      "id": "4960",
+      "friend": {
+        "id": "93409",
+        "friend": {
+          "id": "898338",
+          "friend": {
+            "id": "638225",
+            "friend": {
+              "id": "1093",
+              "friend": {
+                "id": "7985",
+                "friend": {
+                  "id": "7950",
+                  "friend": {
+                    "id": "593382",
+                    "friend": {
+                      "id": "9670919"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+  });
+
+  test('can limit number of nodes', () => {
+    const user = (): Template => ['obj', [
+      ['id', ['str', ['repeat', 4, 8, ['pick', ...'0123456789'.split('')]]]],
+      ['friend', user, .2]
+    ]];
+    const result = deterministic(123, () => TemplateJson.gen(user, {maxNodes: 5}));
+    expect(result).toEqual({
+      "id": "4960",
+      "friend": {
+        "id": "93409",
+        "friend": {
+          "id": "898338"
+        }
+      }
     });
   });
 });
