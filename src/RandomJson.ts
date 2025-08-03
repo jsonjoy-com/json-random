@@ -1,4 +1,4 @@
-import {randomString, Token} from './string';
+import {randomString, type Token} from './string';
 
 type JsonValue = unknown;
 
@@ -170,7 +170,7 @@ export class RandomJson {
           : Math.random() < 0.2
             ? Math.round(0xffff * (2 * Math.random() - 1))
             : Math.round(Number.MAX_SAFE_INTEGER * (2 * Math.random() - 1));
-    if (num === -0) return 0;
+    if (num === 0) return 0;
     return num;
   }
 
