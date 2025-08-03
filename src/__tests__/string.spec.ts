@@ -1,6 +1,5 @@
 import {randomString, Token} from '../string';
 
-// Tests for randomString
 describe('randomString', () => {
   it('should pick a random string from the array', () => {
     const token: Token = ['pick', ['apple', 'banana', 'cherry']];

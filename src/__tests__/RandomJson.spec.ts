@@ -126,10 +126,8 @@ test('can specify string generation schema', () => {
     rootNode: 'string',
     strings: [
       'list',
-      [
-        ['repeat', 2, 2, 'xx'],
-        ['pick', ['y']],
-      ],
+      ['repeat', 2, 2, 'xx'],
+      ['pick', ['y']],
     ],
   });
   expect(str).toBe('xxxxy');

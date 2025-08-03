@@ -54,7 +54,9 @@
   "peerDependencies": {
     "tslib": "2"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@jsonjoy.com/buffers": "^1.0.0"
+  },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@types/benchmark": "^2.1.2",
