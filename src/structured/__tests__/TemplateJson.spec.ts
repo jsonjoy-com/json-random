@@ -330,7 +330,6 @@ describe('TemplateJson', () => {
           ],
         ],
       ])) as Record<string, unknown>;
-      console.log(map);
       expect(typeof map).toBe('object');
       const keys = Object.keys(map);
       for (const key of keys) {

@@ -1,5 +1,13 @@
 # `json-random`
 
+The `json-random` library lets you generate random JSON values.
+
+- `randomString` - generates a random string following a string token template.
+- `TemplateJson` - generates random JSON following a template.
+- `RandomJson` - generates random JSON by generating new nodes and inserting them into random positions in the JSON.
+- `int` - generates a random integer.
+- `deterministic(seed, () => {})` - fixates `Math.random()` such that code in callback generates a deterministic value.
+
 
 ## Use Cases
 
@@ -25,12 +33,18 @@ const optimizedFunction = codegen.compile();
 ```
 
 
-# json-random
+## Reference
 
-The `json-random` library lets you generate random JSON values.
+### `randomString`
+
+TODO: ...
 
 
-## Usage
+### `TemplateJson`
+
+TODO: ...
+
+### `RandomJson`
 
 Generate a random JSON object.
 
