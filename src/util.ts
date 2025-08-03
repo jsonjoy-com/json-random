@@ -2,10 +2,12 @@ import {isUint8Array} from '@jsonjoy.com/buffers/lib/isUint8Array';
 
 const random = Math.random;
 
-export const rnd = (seed = 123456789) => () => {
-  seed = (seed * 48271) % 2147483647;
-  return (seed - 1) / 2147483646;
-};
+export const rnd =
+  (seed = 123456789) =>
+  () => {
+    seed = (seed * 48271) % 2147483647;
+    return (seed - 1) / 2147483646;
+  };
 
 /**
  * Executes code in a callback *deterministically*: the `Math.random()` function
@@ -31,7 +33,7 @@ export const deterministic = <T>(rndSeed: number | (() => number), code: () => T
   } finally {
     if (isNative) Math.random = random;
   }
-}
+};
 
 const {isArray} = Array;
 const objectKeys = Object.keys;

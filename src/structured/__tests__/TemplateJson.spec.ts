@@ -1,7 +1,7 @@
-import {resetMathRandom} from "../../__tests__/setup";
-import {deterministic} from "../../util";
-import {TemplateJson} from "../TemplateJson";
-import {Template} from "../types";
+import {resetMathRandom} from '../../__tests__/setup';
+import {deterministic} from '../../util';
+import {TemplateJson} from '../TemplateJson';
+import type {Template} from '../types';
 
 describe('TemplateJson', () => {
   describe('str', () => {
@@ -128,7 +128,7 @@ describe('TemplateJson', () => {
     });
 
     test('deep clones objects', () => {
-      const obj = { a: 1, b: { c: 2 } };
+      const obj = {a: 1, b: {c: 2}};
       const result = TemplateJson.gen(['lit', obj]);
       expect(result).toEqual(obj);
       expect(result).not.toBe(obj);
@@ -136,7 +136,7 @@ describe('TemplateJson', () => {
     });
 
     test('deep clones arrays', () => {
-      const arr = [1, [2, 3], { a: 4 }];
+      const arr = [1, [2, 3], {a: 4}];
       const result = TemplateJson.gen(['lit', arr]);
       expect(result).toEqual(arr);
       expect(result).not.toBe(arr);
@@ -173,7 +173,16 @@ describe('TemplateJson', () => {
 
     test('can specify head templates', () => {
       resetMathRandom();
-      const arr = TemplateJson.gen(['arr', 1, 1, 'nil', [['lit', 'first'], ['lit', 'second']]]);
+      const arr = TemplateJson.gen([
+        'arr',
+        1,
+        1,
+        'nil',
+        [
+          ['lit', 'first'],
+          ['lit', 'second'],
+        ],
+      ]);
       expect(Array.isArray(arr)).toBe(true);
       expect((arr as any[])[0]).toBe('first');
       expect((arr as any[])[1]).toBe('second');
@@ -181,7 +190,17 @@ describe('TemplateJson', () => {
 
     test('can specify tail templates', () => {
       resetMathRandom();
-      const arr = TemplateJson.gen(['arr', 1, 1, 'nil', [], [['lit', 'tail1'], ['lit', 'tail2']]]);
+      const arr = TemplateJson.gen([
+        'arr',
+        1,
+        1,
+        'nil',
+        [],
+        [
+          ['lit', 'tail1'],
+          ['lit', 'tail2'],
+        ],
+      ]);
       expect(Array.isArray(arr)).toBe(true);
       const arrTyped = arr as any[];
       expect(arrTyped[arrTyped.length - 2]).toBe('tail1');
@@ -204,10 +223,13 @@ describe('TemplateJson', () => {
 
     test('can specify fields', () => {
       resetMathRandom();
-      const obj = TemplateJson.gen(['obj', [
-        ['name', 'str'],
-        ['age', 'int']
-      ]]);
+      const obj = TemplateJson.gen([
+        'obj',
+        [
+          ['name', 'str'],
+          ['age', 'int'],
+        ],
+      ]);
       expect(typeof obj).toBe('object');
       expect(typeof (obj as any).name).toBe('string');
       expect(typeof (obj as any).age).toBe('number');
@@ -215,19 +237,20 @@ describe('TemplateJson', () => {
 
     test('handles optional fields', () => {
       resetMathRandom();
-      const obj = TemplateJson.gen(['obj', [
-        ['required', 'str', 0],
-        ['optional', 'str', 1]
-      ]]);
+      const obj = TemplateJson.gen([
+        'obj',
+        [
+          ['required', 'str', 0],
+          ['optional', 'str', 1],
+        ],
+      ]);
       expect(typeof (obj as any).required).toBe('string');
       expect((obj as any).optional).toBeUndefined();
     });
 
     test('can use token for key generation', () => {
       resetMathRandom();
-      const obj = TemplateJson.gen(['obj', [
-        [['pick', 'key1', 'key2'], 'str']
-      ]]);
+      const obj = TemplateJson.gen(['obj', [[['pick', 'key1', 'key2'], 'str']]]);
       expect(typeof obj).toBe('object');
       const keys = Object.keys(obj as any);
       expect(keys.length).toBe(1);
@@ -236,12 +259,102 @@ describe('TemplateJson', () => {
 
     test('handles null key token', () => {
       resetMathRandom();
-      const obj = TemplateJson.gen(['obj', [
-        [null, 'str']
-      ]]);
+      const obj = TemplateJson.gen(['obj', [[null, 'str']]]);
       expect(typeof obj).toBe('object');
       const keys = Object.keys(obj as any);
       expect(keys.length).toBe(1);
+    });
+  });
+
+  describe('map', () => {
+    test('uses default map schema when using shorthand', () => {
+      const map = TemplateJson.gen('map');
+      expect(typeof map).toBe('object');
+      expect(map).not.toBe(null);
+      expect(Array.isArray(map)).toBe(false);
+    });
+
+    test('generates map with default parameters', () => {
+      resetMathRandom();
+      const map = TemplateJson.gen(['map', null]) as Record<string, unknown>;
+      expect(typeof map).toBe('object');
+      expect(map).not.toBe(null);
+      const keys = Object.keys(map);
+      expect(keys.length).toBeGreaterThanOrEqual(0);
+      expect(keys.length).toBeLessThanOrEqual(5);
+    });
+
+    test('generates map with custom key token', () => {
+      resetMathRandom();
+      const map = TemplateJson.gen(['map', ['pick', 'key1', 'key2', 'key3'], 'str']) as Record<string, unknown>;
+      expect(typeof map).toBe('object');
+      const keys = Object.keys(map);
+      for (const key of keys) {
+        expect(['key1', 'key2', 'key3']).toContain(key);
+        expect(typeof map[key]).toBe('string');
+      }
+    });
+
+    test('generates map with custom value template', () => {
+      resetMathRandom();
+      const map = TemplateJson.gen(['map', null, 'int']) as Record<string, unknown>;
+      expect(typeof map).toBe('object');
+      const values = Object.values(map);
+      for (const value of values) {
+        expect(typeof value).toBe('number');
+        expect(Number.isInteger(value)).toBe(true);
+      }
+    });
+
+    test('respects min and max constraints', () => {
+      resetMathRandom();
+      const map1 = TemplateJson.gen(['map', null, 'str', 2, 2]) as Record<string, unknown>;
+      expect(Object.keys(map1).length).toBe(2);
+
+      resetMathRandom();
+      const map2 = TemplateJson.gen(['map', null, 'str', 0, 1]) as Record<string, unknown>;
+      const keys = Object.keys(map2);
+      expect(keys.length).toBeGreaterThanOrEqual(0);
+      expect(keys.length).toBeLessThanOrEqual(1);
+    });
+
+    test('handles complex nested templates', () => {
+      resetMathRandom();
+      const map = TemplateJson.gen([
+        'map',
+        ['list', 'user_', ['pick', '1', '2', '3']],
+        [
+          'obj',
+          [
+            ['name', 'str'],
+            ['age', 'int'],
+          ],
+        ],
+      ]) as Record<string, unknown>;
+
+      expect(typeof map).toBe('object');
+      const keys = Object.keys(map);
+      for (const key of keys) {
+        expect(key).toMatch(/^user_[123]$/);
+        const value = map[key];
+        expect(typeof value).toBe('object');
+        expect(value).not.toBe(null);
+        expect(typeof (value as any).name).toBe('string');
+        expect(typeof (value as any).age).toBe('number');
+      }
+    });
+
+    test('handles empty map when min is 0', () => {
+      const map = TemplateJson.gen(['map', null, 'str', 0, 0]) as Record<string, unknown>;
+      expect(typeof map).toBe('object');
+      expect(Object.keys(map).length).toBe(0);
+    });
+
+    test('respects maxNodes limit', () => {
+      const map = TemplateJson.gen(['map', null, 'str', 10, 20], {maxNodes: 5}) as Record<string, unknown>;
+      expect(typeof map).toBe('object');
+      const keys = Object.keys(map);
+      expect(keys.length).toBeLessThanOrEqual(10);
     });
   });
 
@@ -266,7 +379,7 @@ describe('TemplateJson', () => {
 
   describe('maxNodeCount', () => {
     test('respects node count limit', () => {
-      const result = TemplateJson.gen(['arr', 1, 100, 'str'], { maxNodes: 5 }) as any[];
+      const result = TemplateJson.gen(['arr', 1, 100, 'str'], {maxNodes: 5}) as any[];
       expect(Array.isArray(result)).toBe(true);
       expect(result.length > 2).toBe(true);
       expect(result.length < 10).toBe(true);
@@ -274,22 +387,42 @@ describe('TemplateJson', () => {
 
     test('works with nested structures', () => {
       const template: any = ['arr', 3, 3, ['obj', [['key', 'str']]]];
-      const result = TemplateJson.gen(template, { maxNodes: 10 });
+      const result = TemplateJson.gen(template, {maxNodes: 10});
       expect(Array.isArray(result)).toBe(true);
     });
   });
 
   describe('edge cases', () => {
     test('handles deeply nested structures', () => {
-      const template: any = ['obj', [
-        ['users', ['arr', 2, 2, ['obj', [
-          ['name', 'str'],
-          ['profile', ['obj', [
-            ['age', 'int'],
-            ['active', 'bool']
-          ]]]
-        ]]]]
-      ]];
+      const template: any = [
+        'obj',
+        [
+          [
+            'users',
+            [
+              'arr',
+              2,
+              2,
+              [
+                'obj',
+                [
+                  ['name', 'str'],
+                  [
+                    'profile',
+                    [
+                      'obj',
+                      [
+                        ['age', 'int'],
+                        ['active', 'bool'],
+                      ],
+                    ],
+                  ],
+                ],
+              ],
+            ],
+          ],
+        ],
+      ];
 
       resetMathRandom();
       const result = TemplateJson.gen(template);
@@ -321,54 +454,60 @@ describe('TemplateJson', () => {
 
 describe('recursive templates', () => {
   test('handles recursive structures', () => {
-    const user = (): Template => ['obj', [
-      ['id', ['str', ['repeat', 4, 8, ['pick', ...'0123456789'.split('')]]]],
-      ['friend', user, .2]
-    ]];
+    const user = (): Template => [
+      'obj',
+      [
+        ['id', ['str', ['repeat', 4, 8, ['pick', ...'0123456789'.split('')]]]],
+        ['friend', user, 0.2],
+      ],
+    ];
     const result = deterministic(123, () => TemplateJson.gen(user));
     expect(result).toEqual({
-      "id": "4960",
-      "friend": {
-        "id": "93409",
-        "friend": {
-          "id": "898338",
-          "friend": {
-            "id": "638225",
-            "friend": {
-              "id": "1093",
-              "friend": {
-                "id": "7985",
-                "friend": {
-                  "id": "7950",
-                  "friend": {
-                    "id": "593382",
-                    "friend": {
-                      "id": "9670919"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+      id: '4960',
+      friend: {
+        id: '93409',
+        friend: {
+          id: '898338',
+          friend: {
+            id: '638225',
+            friend: {
+              id: '1093',
+              friend: {
+                id: '7985',
+                friend: {
+                  id: '7950',
+                  friend: {
+                    id: '593382',
+                    friend: {
+                      id: '9670919',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
   });
 
   test('can limit number of nodes', () => {
-    const user = (): Template => ['obj', [
-      ['id', ['str', ['repeat', 4, 8, ['pick', ...'0123456789'.split('')]]]],
-      ['friend', user, .2]
-    ]];
+    const user = (): Template => [
+      'obj',
+      [
+        ['id', ['str', ['repeat', 4, 8, ['pick', ...'0123456789'.split('')]]]],
+        ['friend', user, 0.2],
+      ],
+    ];
     const result = deterministic(123, () => TemplateJson.gen(user, {maxNodes: 5}));
     expect(result).toEqual({
-      "id": "4960",
-      "friend": {
-        "id": "93409",
-        "friend": {
-          "id": "898338"
-        }
-      }
+      id: '4960',
+      friend: {
+        id: '93409',
+        friend: {
+          id: '898338',
+        },
+      },
     });
   });
 });

@@ -1,12 +1,9 @@
-import {Token} from "../string";
+import type {Token} from '../string';
 
 /**
  * Schema (template) for random JSON generation.
  */
-export type Template =
-  | TemplateShorthand
-  | TemplateNode
-  | TemplateRecursiveReference;
+export type Template = TemplateShorthand | TemplateNode | TemplateRecursiveReference;
 
 export type TemplateNode =
   | LiteralTemplate
@@ -18,9 +15,10 @@ export type TemplateNode =
   | NullTemplate
   | ArrayTemplate
   | ObjectTemplate
+  | MapTemplate
   | OrTemplate;
 
-export type TemplateShorthand = 'num' | 'int' | 'float' | 'str' | 'bool' | 'nil' | 'arr' | 'obj';
+export type TemplateShorthand = 'num' | 'int' | 'float' | 'str' | 'bool' | 'nil' | 'arr' | 'obj' | 'map';
 
 /**
  * Recursive reference allows for recursive template construction, for example:
@@ -116,7 +114,7 @@ export type ArrayTemplate = [
    * The templates to use for generating the *tail* array elements. The tail
    * is the "rest" part of the array that is generated after the main template.
    */
-  tail?: Template[]
+  tail?: Template[],
 ];
 
 /**
@@ -132,7 +130,7 @@ export type ObjectTemplate = [
    * valid JSON template. Fields can also be optional. Fields are generated
    * in a random order.
    */
-  fields?: ObjectTemplateField[]
+  fields?: ObjectTemplateField[],
 ];
 
 /**
@@ -156,7 +154,33 @@ export type ObjectTemplateField = [
    * with a probability of 1. If not specified, the field is required (0
    * probability of omission).
    */
-  optionality?: number
+  optionality?: number,
+];
+
+/**
+ * Generates a random map-like (record) structure, where every value has the
+ * same template.
+ */
+export type MapTemplate = [
+  type: 'map',
+  /**
+   * Token to use for generating the keys of the map. If `null`, the default
+   * key {@link Token} will be used.
+   */
+  key: Token | null,
+  /**
+   * The template for the value of the map. If not specified, the default
+   * template will be used.
+   */
+  value?: Template,
+  /**
+   * The minimum number of entries in the map. Defaults to 0.
+   */
+  min?: number,
+  /**
+   * The maximum number of entries in the map. Defaults to 5.
+   */
+  max?: number,
 ];
 
 /**

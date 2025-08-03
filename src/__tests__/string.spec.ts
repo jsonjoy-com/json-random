@@ -1,4 +1,4 @@
-import {randomString, Token} from '../string';
+import {randomString, type Token} from '../string';
 import {deterministic} from '../util';
 
 describe('randomString', () => {
@@ -43,11 +43,7 @@ describe('randomString', () => {
   });
 
   it('can nest picks', () => {
-    const token: Token = [
-      'pick',
-      ['pick', 'monkey', 'dog', 'cat'],
-      ['pick', 'banana', 'apple'],
-    ];
+    const token: Token = ['pick', ['pick', 'monkey', 'dog', 'cat'], ['pick', 'banana', 'apple']];
     const str = deterministic(123, () => randomString(token));
     expect(str).toBe('dog');
   });
