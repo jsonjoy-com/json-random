@@ -112,6 +112,66 @@ describe('TemplateJson', () => {
     });
   });
 
+  describe('bin', () => {
+    test('uses default binary schema, if not provided', () => {
+      resetMathRandom();
+      const bin = TemplateJson.gen('bin');
+      expect(bin instanceof Uint8Array).toBe(true);
+      expect((bin as Uint8Array).length).toBeGreaterThanOrEqual(0);
+      expect((bin as Uint8Array).length).toBeLessThanOrEqual(5);
+    });
+
+    test('can specify length range', () => {
+      resetMathRandom();
+      const bin = TemplateJson.gen(['bin', 2, 4]) as Uint8Array;
+      expect(bin instanceof Uint8Array).toBe(true);
+      expect(bin.length).toBeGreaterThanOrEqual(2);
+      expect(bin.length).toBeLessThanOrEqual(4);
+    });
+
+    test('can specify octet value range', () => {
+      resetMathRandom();
+      const bin = TemplateJson.gen(['bin', 5, 5, 100, 150]) as Uint8Array;
+      expect(bin instanceof Uint8Array).toBe(true);
+      expect(bin.length).toBe(5);
+      for (let i = 0; i < bin.length; i++) {
+        expect(bin[i]).toBeGreaterThanOrEqual(100);
+        expect(bin[i]).toBeLessThanOrEqual(150);
+      }
+    });
+
+    test('handles edge cases', () => {
+      // Empty array
+      const empty = TemplateJson.gen(['bin', 0, 0]) as Uint8Array;
+      expect(empty instanceof Uint8Array).toBe(true);
+      expect(empty.length).toBe(0);
+
+      // Single byte with fixed value range
+      resetMathRandom();
+      const single = TemplateJson.gen(['bin', 1, 1, 42, 42]) as Uint8Array;
+      expect(single instanceof Uint8Array).toBe(true);
+      expect(single.length).toBe(1);
+      expect(single[0]).toBe(42);
+    });
+
+    test('uses default octet range when not specified', () => {
+      resetMathRandom();
+      const bin = TemplateJson.gen(['bin', 3, 3]) as Uint8Array;
+      expect(bin instanceof Uint8Array).toBe(true);
+      expect(bin.length).toBe(3);
+      for (let i = 0; i < bin.length; i++) {
+        expect(bin[i]).toBeGreaterThanOrEqual(0);
+        expect(bin[i]).toBeLessThanOrEqual(255);
+      }
+    });
+
+    test('respects maxNodes limit', () => {
+      const bin = TemplateJson.gen(['bin', 10, 20], {maxNodes: 5}) as Uint8Array;
+      expect(bin instanceof Uint8Array).toBe(true);
+      expect(bin.length).toBeLessThanOrEqual(10);
+    });
+  });
+
   describe('nil', () => {
     test('always returns null', () => {
       expect(TemplateJson.gen('nil')).toBe(null);
@@ -375,6 +435,16 @@ describe('TemplateJson', () => {
       const result = TemplateJson.gen(['or', ['lit', 'only']]);
       expect(result).toBe('only');
     });
+
+    test('works with bin templates', () => {
+      resetMathRandom();
+      const result = TemplateJson.gen(['or', 'str', 'int', ['bin', 2, 2]]);
+      // Result should be one of the template types
+      const isString = typeof result === 'string';
+      const isNumber = typeof result === 'number';
+      const isBin = result instanceof Uint8Array;
+      expect(isString || isNumber || isBin).toBe(true);
+    });
   });
 
   describe('maxNodeCount', () => {
@@ -448,6 +518,39 @@ describe('TemplateJson', () => {
       const result = TemplateJson.gen(['int', Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER]);
       expect(typeof result).toBe('number');
       expect(Number.isInteger(result)).toBe(true);
+    });
+
+    test('handles bin templates in complex structures', () => {
+      resetMathRandom();
+      const template: any = [
+        'obj',
+        [
+          ['name', 'str'],
+          ['data', ['bin', 3, 3]],
+          ['metadata', [
+            'obj',
+            [
+              ['hash', ['bin', 32, 32]],
+              ['signature', ['bin', 64, 64, 0, 127]],
+            ],
+          ]],
+        ],
+      ];
+      const result = TemplateJson.gen(template) as any;
+      expect(typeof result).toBe('object');
+      expect(typeof result.name).toBe('string');
+      expect(result.data instanceof Uint8Array).toBe(true);
+      expect(result.data.length).toBe(3);
+      expect(typeof result.metadata).toBe('object');
+      expect(result.metadata.hash instanceof Uint8Array).toBe(true);
+      expect(result.metadata.hash.length).toBe(32);
+      expect(result.metadata.signature instanceof Uint8Array).toBe(true);
+      expect(result.metadata.signature.length).toBe(64);
+      // Check signature values are in the specified range
+      for (let i = 0; i < result.metadata.signature.length; i++) {
+        expect(result.metadata.signature[i]).toBeGreaterThanOrEqual(0);
+        expect(result.metadata.signature[i]).toBeLessThanOrEqual(127);
+      }
     });
   });
 });

@@ -4,6 +4,7 @@ import {clone} from '../util';
 import * as templates from './templates';
 import type {
   ArrayTemplate,
+  BinTemplate,
   BooleanTemplate,
   FloatTemplate,
   IntegerTemplate,
@@ -70,6 +71,8 @@ export class TemplateJson {
         return this.generateFloat(template as FloatTemplate);
       case 'bool':
         return this.generateBoolean(template as BooleanTemplate);
+      case 'bin':
+        return this.generateBin(template as BinTemplate);
       case 'nil':
         return null;
       case 'lit':
@@ -151,6 +154,16 @@ export class TemplateJson {
   protected generateBoolean(template: BooleanTemplate): boolean {
     const value = template[1];
     return value !== undefined ? value : Math.random() < 0.5;
+  }
+
+  protected generateBin(template: BinTemplate): Uint8Array {
+    const [, min = 0, max = 5, omin = 0, omax = 255] = template;
+    const length = this.minmax(min, max);
+    const result = new Uint8Array(length);
+    for (let i = 0; i < length; i++) {
+      result[i] = int(omin, omax);
+    }
+    return result;
   }
 
   protected generateLiteral(template: LiteralTemplate): unknown {

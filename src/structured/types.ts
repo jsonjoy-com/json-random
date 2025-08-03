@@ -12,13 +12,14 @@ export type TemplateNode =
   | FloatTemplate
   | StringTemplate
   | BooleanTemplate
+  | BinTemplate
   | NullTemplate
   | ArrayTemplate
   | ObjectTemplate
   | MapTemplate
   | OrTemplate;
 
-export type TemplateShorthand = 'num' | 'int' | 'float' | 'str' | 'bool' | 'nil' | 'arr' | 'obj' | 'map';
+export type TemplateShorthand = 'num' | 'int' | 'float' | 'str' | 'bool' | 'bin' | 'nil' | 'arr' | 'obj' | 'map';
 
 /**
  * Recursive reference allows for recursive template construction, for example:
@@ -79,6 +80,30 @@ export type StringTemplate = [type: 'str', token?: Token];
  * `true` or `false`.
  */
 export type BooleanTemplate = [type: 'bool', value?: boolean];
+
+/**
+ * Binary template. Generates a random Uint8Array. The template allows
+ * specifying the length of binary data and the range of values in each octet.
+ */
+export type BinTemplate = [
+  type: 'bin',
+  /**
+   * The minimum length of binary data. Defaults to 0.
+   */
+  min?: number,
+  /**
+   * The maximum length of binary data. Defaults to 5.
+   */
+  max?: number,
+  /**
+   * The minimum octet value. Defaults to 0.
+   */
+  omin?: number,
+  /**
+   * The maximum octet value. Defaults to 255.
+   */
+  omax?: number,
+];
 
 /**
  * Null template. Generates a `null` value. If a specific value is provided, it
