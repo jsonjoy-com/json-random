@@ -1,5 +1,5 @@
 import {TemplateJson} from '../structured/TemplateJson';
-import * as templates from '../structured/templates';
+import * as templates from '../examples';
 
 console.log('🎲 JSON Random Template Examples\n');
 
@@ -62,3 +62,10 @@ console.log(JSON.stringify(empty, null, 2));
 console.log('\n📏 Large numbers:');
 const large = TemplateJson.gen(templates.largeNumbers);
 console.log(JSON.stringify(large, null, 2));
+
+console.log('\n🎰 Random examples from allExamples template:');
+for (let i = 0; i < 3; i++) {
+  const example = TemplateJson.gen(templates.allExamples);
+  console.log(`Example ${i + 1}:`, JSON.stringify(example, null, 2));
+  console.log('---');
+}

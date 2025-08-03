@@ -1,7 +1,7 @@
 import {resetMathRandom} from '../../__tests__/setup';
 import {deterministic} from '../../util';
 import {TemplateJson} from '../TemplateJson';
-import * as templates from '../templates';
+import * as templates from '../../examples';
 
 describe('Template Examples', () => {
   describe('String Pattern Templates', () => {
@@ -100,7 +100,7 @@ describe('Template Examples', () => {
         expect(product).toHaveProperty('inventory');
         expect(product).toHaveProperty('rating');
         expect(product).toHaveProperty('reviews');
-        
+
         expect(typeof product.id).toBe('string');
         expect(product.id).toMatch(/^prod_\d{8}$/);
         expect(typeof product.price).toBe('number');
@@ -121,7 +121,7 @@ describe('Template Examples', () => {
         expect(order).toHaveProperty('total');
         expect(order).toHaveProperty('status');
         expect(order).toHaveProperty('shippingAddress');
-        
+
         expect(order.orderId).toMatch(/^ORD-\d{10}$/);
         expect(order.customerId).toMatch(/^CUST-[A-Z]{3}\d{6}$/);
         expect(Array.isArray(order.items)).toBe(true);
@@ -169,7 +169,7 @@ describe('Template Examples', () => {
         expect(reading).toHaveProperty('timestamp');
         expect(reading).toHaveProperty('location');
         expect(reading).toHaveProperty('status');
-        
+
         expect(reading.sensorId).toMatch(/^sensor_[A-Z]{2}\d{6}$/);
         expect(typeof reading.value).toBe('number');
         expect(reading.value).toBeGreaterThanOrEqual(-50);
@@ -192,7 +192,7 @@ describe('Template Examples', () => {
         expect(patient).toHaveProperty('bloodType');
         expect(patient).toHaveProperty('allergies');
         expect(patient).toHaveProperty('emergencyContact');
-        
+
         expect(patient.patientId).toMatch(/^PAT-\d{8}$/);
         expect(typeof patient.firstName).toBe('string');
         expect(typeof patient.lastName).toBe('string');
@@ -213,7 +213,7 @@ describe('Template Examples', () => {
       expect(empty).toHaveProperty('nullValue');
       expect(empty).toHaveProperty('zeroNumber');
       expect(empty).toHaveProperty('falseBool');
-      
+
       expect(empty.emptyObject).toEqual({});
       expect(empty.emptyArray).toEqual([]);
       expect(empty.emptyString).toBe('');
@@ -231,7 +231,7 @@ describe('Template Examples', () => {
         expect(unicode).toHaveProperty('chinese');
         expect(unicode).toHaveProperty('arabic');
         expect(unicode).toHaveProperty('mixed');
-        
+
         expect(typeof unicode.ascii).toBe('string');
         expect(typeof unicode.emoji).toBe('string');
         expect(typeof unicode.mixed).toBe('string');
@@ -246,7 +246,7 @@ describe('Template Examples', () => {
       expect(large).toHaveProperty('smallFloat');
       expect(large).toHaveProperty('preciseDecimal');
       expect(large).toHaveProperty('scientificNotation');
-      
+
       expect(large.maxSafeInteger).toBe(Number.MAX_SAFE_INTEGER);
       expect(large.minSafeInteger).toBe(Number.MIN_SAFE_INTEGER);
       expect(typeof large.largeFloat).toBe('number');
@@ -261,10 +261,30 @@ describe('Template Examples', () => {
         for (let i = 0; i < 10; i++) {
           values.push(TemplateJson.gen(templates.mixedTypes));
         }
-        
+
         // Should have generated different types
-        const types = new Set(values.map(v => typeof v));
+        const types = new Set(values.map((v) => typeof v));
         expect(types.size).toBeGreaterThan(1);
+      });
+    });
+  });
+
+  describe('Combined Template', () => {
+    test('generates data from allExamples template using or', () => {
+      deterministic(9999, () => {
+        // Test multiple times to ensure it can generate different types
+        const results = [];
+        for (let i = 0; i < 20; i++) {
+          const result = TemplateJson.gen(templates.allExamples);
+          results.push(result);
+          expect(result).toBeDefined();
+          expect(typeof result).toBe('object');
+        }
+
+        // Should have generated some variety (not all identical)
+        const stringified = results.map((r) => JSON.stringify(r));
+        const unique = new Set(stringified);
+        expect(unique.size).toBeGreaterThan(1);
       });
     });
   });
