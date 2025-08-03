@@ -25,13 +25,11 @@ describe('randomString', () => {
   it('executes a list of tokens', () => {
     const token: Token = [
       'list',
-      [
-        ['pick', ['monkey', 'dog', 'cat']],
-        ['pick', [' ']],
-        ['pick', ['ate', 'threw', 'picked']],
-        ['pick', [' ']],
-        ['pick', ['apple', 'banana', 'cherry']],
-      ],
+      ['pick', ['monkey', 'dog', 'cat']],
+      ['pick', [' ']],
+      ['pick', ['ate', 'threw', 'picked']],
+      ['pick', [' ']],
+      ['pick', ['apple', 'banana', 'cherry']],
     ];
     const result = randomString(token);
     expect(/monkey|dog|cat/.test(result)).toBe(true);

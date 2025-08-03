@@ -27,7 +27,7 @@ export type TokenRange = [type: 'range', min: number, max: number];
 /**
  * Executes a list of `what` tokens in sequence.
  */
-export type TokenList = [type: 'list', what: Token[]];
+export type TokenList = [type: 'list', ...what: Token[]];
 
 /**
  * Generates a random string based on the provided token.
@@ -58,7 +58,8 @@ export function randomString(token: Token): string {
       return String.fromCodePoint(codePoint);
     }
     case 'list':
-      return token[1].map(randomString).join('');
+      const [_, ...list] = token;
+      return list.map(randomString).join('');
     default:
       throw new Error('Invalid token type');
   }

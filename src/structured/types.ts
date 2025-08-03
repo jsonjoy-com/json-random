@@ -4,6 +4,10 @@ import {Token} from "../string";
  * Schema (template) for random JSON generation.
  */
 export type Template =
+  | TemplateShorthand
+  | TemplateNode;
+
+export type TemplateNode =
   | LiteralTemplate
   | NumberTemplate
   | IntegerTemplate
@@ -15,6 +19,8 @@ export type Template =
   | ObjectTemplate
   | OrTemplate;
 
+export type TemplateShorthand = 'num' | 'int' | 'float' | 'str' | 'bool' | 'nil' | 'arr' | 'obj';
+
 /**
  * Literal value template. The literal value is deeply cloned when generating
  * the random JSON and inserted as-is.
@@ -25,47 +31,47 @@ export type LiteralTemplate = ['lit', value: unknown];
  * Number template. Generates a random number within the specified range. Can be
  * a floating-point number or an integer.
  */
-export type NumberTemplate = 'num' | [type: 'num', min?: number, max?: number];
+export type NumberTemplate = [type: 'num', min?: number, max?: number];
 
 /**
  * Integer template. Generates a random integer within the specified range.
  * If no range is specified, it defaults to the full range of JavaScript integers.
  */
-export type IntegerTemplate = 'int' | [type: 'int', min?: number, max?: number];
+export type IntegerTemplate = [type: 'int', min?: number, max?: number];
 
 /**
  * Float template. Generates a random floating-point number within the specified
  * range. If no range is specified, it defaults to the full range of JavaScript
  * floating-point numbers.
  */
-export type FloatTemplate = 'float' | [type: 'float', min?: number, max?: number];
+export type FloatTemplate = [type: 'float', min?: number, max?: number];
 
 /**
  * String template. Generates a random string based on the
  * provided {@link Token} schema. If no token is specified, it defaults to a
  * simple string generation.
  */
-export type StringTemplate = 'str' | [type: 'str', token?: Token];
+export type StringTemplate = [type: 'str', token?: Token];
 
 /**
  * Boolean template. Generates a random boolean value. If a specific value is
  * provided, it will always return that value; otherwise, it randomly returns
  * `true` or `false`.
  */
-export type BooleanTemplate = 'bool' | [type: 'bool', value?: boolean];
+export type BooleanTemplate = [type: 'bool', value?: boolean];
 
 /**
  * Null template. Generates a `null` value. If a specific value is provided, it
  * will always return that value; otherwise, it returns `null`.
  */
-export type NullTemplate = 'null' | [type: 'null'];
+export type NullTemplate = [type: 'nil'];
 
 /**
  * Array template. Generates a random array. If no template is specified, it
  * uses the default template. If a template is provided, it generates an array
  * of random values based on that template.
  */
-export type ArrayTemplate = 'arr' | [
+export type ArrayTemplate = [
   type: 'arr',
   /**
    * The minimum number of elements in the array.
@@ -96,7 +102,7 @@ export type ArrayTemplate = 'arr' | [
  * uses the default template. If fields are provided, it generates an object
  * with those fields, where each field can be optional or required.
  */
-export type ObjectTemplate = 'obj' | [
+export type ObjectTemplate = [
   type: 'obj',
   /**
    * Fields of the object. Once can specify key and value templates for each
