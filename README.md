@@ -163,16 +163,20 @@ Templates define the structure and type of generated data:
 // Shorthand templates
 TemplateJson.gen('str');    // Random string
 TemplateJson.gen('int');    // Random integer
+TemplateJson.gen('int64');  // Random 64-bit integer (bigint)
 TemplateJson.gen('float');  // Random float
 TemplateJson.gen('num');    // Random number (int or float)
 TemplateJson.gen('bool');   // Random boolean
+TemplateJson.gen('bin');    // Random binary data (Uint8Array)
 TemplateJson.gen('nil');    // null value
 
 // Type-specific templates
 TemplateJson.gen(['str', tokenPattern]);           // String with pattern
 TemplateJson.gen(['int', min, max]);              // Integer in range
+TemplateJson.gen(['int64', min, max]);            // 64-bit integer in range (bigint)
 TemplateJson.gen(['float', min, max]);            // Float in range
 TemplateJson.gen(['bool', fixedValue]);           // Fixed or random boolean
+TemplateJson.gen(['bin', min, max, omin, omax]);  // Binary with length and octet range
 TemplateJson.gen(['lit', anyValue]);              // Literal value (cloned)
 ```
 
@@ -191,9 +195,69 @@ const age = TemplateJson.gen(['int', 18, 100]);
 const price = TemplateJson.gen(['float', 0.01, 999.99]);
 const score = TemplateJson.gen(['num', 0, 100]);
 
+// 64-bit integers (bigint)
+const largeId = TemplateJson.gen(['int64', BigInt('1000000000000'), BigInt('9999999999999')]);
+const timestamp = TemplateJson.gen(['int64', BigInt('1640000000000'), BigInt('1700000000000')]);
+
+// Binary data (Uint8Array)
+const hash = TemplateJson.gen(['bin', 32, 32]); // 32-byte hash
+const key = TemplateJson.gen(['bin', 16, 16, 0, 255]); // 16-byte key with full octet range
+const randomBytes = TemplateJson.gen(['bin', 1, 10]); // 1-10 random bytes
+
 // Fixed values
 const isActive = TemplateJson.gen(['bool', true]);
 const userId = TemplateJson.gen(['lit', 'user_12345']);
+```
+
+##### 64-bit Integer Templates
+
+Generate large integers using JavaScript's bigint type:
+
+```typescript
+// Basic 64-bit integer
+const id = TemplateJson.gen('int64');                // Random bigint in safe range
+
+// 64-bit integer with range
+const timestamp = TemplateJson.gen(['int64', 
+  BigInt('1640000000000'),  // Min value
+  BigInt('1700000000000')   // Max value
+]);
+
+// Large database IDs
+const dbId = TemplateJson.gen(['int64', 
+  BigInt('1000000000000000000'), 
+  BigInt('9999999999999999999')
+]);
+
+// Fixed bigint value
+const constant = TemplateJson.gen(['int64', BigInt('42'), BigInt('42')]);
+```
+
+##### Binary Data Templates
+
+Generate binary data as Uint8Array:
+
+```typescript
+// Basic binary data (0-5 bytes)
+const data = TemplateJson.gen('bin');
+
+// Binary with specific length range
+const hash = TemplateJson.gen(['bin', 32, 32]);     // Exactly 32 bytes
+const key = TemplateJson.gen(['bin', 16, 64]);      // 16-64 bytes
+
+// Binary with octet value constraints
+const restrictedData = TemplateJson.gen(['bin', 
+  8,    // Min length: 8 bytes
+  16,   // Max length: 16 bytes  
+  32,   // Min octet value: 32
+  126   // Max octet value: 126 (printable ASCII range)
+]);
+
+// Cryptographic examples
+const aesKey = TemplateJson.gen(['bin', 32, 32]);           // 256-bit AES key
+const iv = TemplateJson.gen(['bin', 16, 16]);               // 128-bit IV
+const salt = TemplateJson.gen(['bin', 16, 32]);             // 16-32 byte salt
+const signature = TemplateJson.gen(['bin', 64, 64, 0, 255]); // 64-byte signature
 ```
 
 ##### Array Templates
@@ -535,6 +599,16 @@ const mockApiResponse = TemplateJson.gen(['obj', [
     ['value', ['float', 0, 1000]]
   ]]]]
 ]]);
+
+// Generate cryptographic test data
+const cryptoData = TemplateJson.gen(['obj', [
+  ['userId', ['int64', BigInt('1000000000000'), BigInt('9999999999999')]],
+  ['sessionId', ['str', ['list', 'sess_', ['repeat', 32, 32, ['pick', ...'0123456789abcdef'.split('')]]]]],
+  ['publicKey', ['bin', 32, 32]], // 256-bit public key
+  ['signature', ['bin', 64, 64]], // 512-bit signature
+  ['nonce', ['bin', 16, 16]],     // 128-bit nonce
+  ['timestamp', ['int64', BigInt(Date.now()), BigInt(Date.now() + 86400000)]]
+]]);
 ```
 
 ### Load Testing
@@ -574,6 +648,11 @@ const serviceConfig = TemplateJson.gen(['obj', [
     ['enabled', 'bool'],
     ['ttl', ['int', 60, 3600]],
     ['max_size', ['int', 100, 10000]]
+  ]]],
+  ['security', ['obj', [
+    ['api_key', ['bin', 32, 32]],                    // 256-bit API key
+    ['session_timeout', ['int64', BigInt('3600'), BigInt('86400')]], // 1 hour to 1 day in seconds
+    ['max_request_size', ['int64', BigInt('1048576'), BigInt('104857600')]] // 1MB to 100MB
   ]]],
   ['features', ['map',
     ['pick', 'feature_a', 'feature_b', 'feature_c', 'feature_d'],
