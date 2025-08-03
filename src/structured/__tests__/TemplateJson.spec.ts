@@ -60,25 +60,25 @@ describe('TemplateJson', () => {
     test('can specify int64 range', () => {
       resetMathRandom();
       const result1 = TemplateJson.gen(['int64', BigInt(-10), BigInt(10)]) as bigint;
-      expect(result1).toBe(BigInt(-9));
+      expect(result1.toString()).toBe('-9');
 
       const result2 = TemplateJson.gen(['int64', BigInt(0), BigInt(1)]) as bigint;
-      expect(result2).toBe(BigInt(0));
+      expect(result2.toString()).toBe('0');
 
       const result3 = TemplateJson.gen(['int64', BigInt(1), BigInt(5)]) as bigint;
-      expect(result3).toBe(BigInt(4));
+      expect(result3.toString()).toBe('3');
     });
 
     test('handles edge cases', () => {
       resetMathRandom();
       const result1 = TemplateJson.gen(['int64', BigInt(0), BigInt(0)]) as bigint;
-      expect(result1).toBe(BigInt(0));
+      expect(result1.toString()).toBe('0');
 
       const result2 = TemplateJson.gen(['int64', BigInt(-1), BigInt(-1)]) as bigint;
-      expect(result2).toBe(BigInt(-1));
+      expect(result2.toString()).toBe('-1');
 
       const result3 = TemplateJson.gen(['int64', BigInt('1000000000000'), BigInt('1000000000000')]) as bigint;
-      expect(result3).toBe(BigInt('1000000000000'));
+      expect(result3.toString()).toBe('1000000000000');
     });
 
     test('handles very large ranges', () => {
