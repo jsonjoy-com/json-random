@@ -1,8 +1,22 @@
-import {int} from "../number";
-import {randomString} from "../string";
-import {clone} from "../util";
-import * as templates from "./templates";
-import type {ArrayTemplate, BooleanTemplate, FloatTemplate, IntegerTemplate, LiteralTemplate, MapTemplate, NumberTemplate, ObjectTemplate, OrTemplate, StringTemplate, Template, TemplateNode, TemplateShorthand} from "./types";
+import {int} from '../number';
+import {randomString} from '../string';
+import {clone} from '../util';
+import * as templates from './templates';
+import type {
+  ArrayTemplate,
+  BooleanTemplate,
+  FloatTemplate,
+  IntegerTemplate,
+  LiteralTemplate,
+  MapTemplate,
+  NumberTemplate,
+  ObjectTemplate,
+  OrTemplate,
+  StringTemplate,
+  Template,
+  TemplateNode,
+  TemplateShorthand,
+} from './types';
 
 export interface TemplateJsonOpts {
   /**
@@ -23,7 +37,10 @@ export class TemplateJson {
   protected nodes: number = 0;
   protected maxNodes: number;
 
-  constructor(public readonly template: Template = templates.nil, public readonly opts: TemplateJsonOpts = {}) {
+  constructor(
+    public readonly template: Template = templates.nil,
+    public readonly opts: TemplateJsonOpts = {},
+  ) {
     this.maxNodes = opts.maxNodes ?? 100;
   }
 
@@ -115,7 +132,7 @@ export class TemplateJson {
   }
 
   protected generateNumber([, min, max]: NumberTemplate): number {
-    if (Math.random() > .5) return this.generateInteger(['int', min, max]);
+    if (Math.random() > 0.5) return this.generateInteger(['int', min, max]);
     else return this.generateFloat(['float', min, max]);
   }
 

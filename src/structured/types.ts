@@ -3,10 +3,7 @@ import type {Token} from '../string';
 /**
  * Schema (template) for random JSON generation.
  */
-export type Template =
-  | TemplateShorthand
-  | TemplateNode
-  | TemplateRecursiveReference;
+export type Template = TemplateShorthand | TemplateNode | TemplateRecursiveReference;
 
 export type TemplateNode =
   | LiteralTemplate

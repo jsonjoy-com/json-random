@@ -319,17 +319,19 @@ describe('TemplateJson', () => {
     });
 
     test('handles complex nested templates', () => {
-      const map = deterministic(12345789, () => TemplateJson.gen([
-        'map',
-        ['list', 'user_', ['pick', '1', '2', '3']],
-        [
-          'obj',
+      const map = deterministic(12345789, () =>
+        TemplateJson.gen([
+          'map',
+          ['list', 'user_', ['pick', '1', '2', '3']],
           [
-            ['name', 'str'],
-            ['age', 'int'],
+            'obj',
+            [
+              ['name', 'str'],
+              ['age', 'int'],
+            ],
           ],
-        ],
-      ])) as Record<string, unknown>;
+        ]),
+      ) as Record<string, unknown>;
       expect(typeof map).toBe('object');
       const keys = Object.keys(map);
       for (const key of keys) {

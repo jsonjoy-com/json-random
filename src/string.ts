@@ -58,9 +58,10 @@ export function randomString(token: Token): string {
       }
       return str;
     }
-    case 'list':
+    case 'list': {
       const [, ...every] = token;
       return every.map(randomString).join('');
+    }
     default:
       throw new Error('Invalid token type');
   }
