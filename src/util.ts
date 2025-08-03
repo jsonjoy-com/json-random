@@ -7,6 +7,22 @@ export const rnd = (seed = 123456789) => () => {
   return (seed - 1) / 2147483646;
 };
 
+/**
+ * Executes code in a callback *deterministically*: the `Math.random()` function
+ * is mocked for the duration of the callback.
+ *
+ * Example:
+ *
+ * ```js
+ * deterministic(123, () => {
+ *   return Math.random() + 1;
+ * });
+ * ```
+ *
+ * @param rndSeed A seed number or a random number generator function.
+ * @param code Code to execute deterministically.
+ * @returns Return value of the code block.
+ */
 export const deterministic = <T>(rndSeed: number | (() => number), code: () => T): T => {
   const isNative = Math.random === random;
   Math.random = typeof rndSeed === 'function' ? rndSeed : rnd(Math.round(rndSeed));
