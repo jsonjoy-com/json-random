@@ -583,6 +583,76 @@ const serviceConfig = TemplateJson.gen(['obj', [
 ]]);
 ```
 
+## Helper Methods for Easy Generation
+
+The library provides convenient helper methods for generating common data types without needing to construct templates manually. These methods are available in the `examples` module:
+
+```typescript
+import { 
+  genUser, 
+  genAddress, 
+  genProduct, 
+  genOrder,
+  genRandomExample 
+} from '@jsonjoy.com/json-random/lib/examples';
+
+// Generate common data types quickly
+const user = genUser();
+const address = genAddress();
+const product = genProduct();
+const order = genOrder();
+
+// Generate random example from any template
+const randomData = genRandomExample();
+```
+
+### Available Helper Methods
+
+| Method | Description |
+|--------|-------------|
+| `genUser()` | Generate comprehensive user profile with details |
+| `genUserBasic()` | Generate basic user with essential information |
+| `genAddress()` | Generate address with street, city, state, etc. |
+| `genProduct()` | Generate product with name, price, category |
+| `genOrder()` | Generate order with items and customer info |
+| `genTransaction()` | Generate financial transaction data |
+| `genBankAccount()` | Generate bank account information |
+| `genSocialPost()` | Generate social media post |
+| `genSocialProfile()` | Generate social media profile |
+| `genLocation()` | Generate location with coordinates |
+| `genApiResponse()` | Generate API response with data array |
+| `genApiResponseDetailed()` | Generate comprehensive API response |
+| `genServiceConfig()` | Generate service configuration |
+| `genPatient()` | Generate medical patient record |
+| `genMedicalRecord()` | Generate comprehensive medical record |
+| `genStudent()` | Generate student profile |
+| `genCourse()` | Generate course information |
+| `genSensorReading()` | Generate IoT sensor reading |
+| `genIotDevice()` | Generate IoT device profile |
+| `genLogEntry()` | Generate log entry for monitoring |
+| `genMetricData()` | Generate metric data for monitoring |
+| `genRandomExample()` | Generate random data from any available template |
+
+### Usage Examples
+
+```typescript
+// Generate test user data for API testing
+const testUser = genUser();
+console.log(testUser);
+// Output: { id: 4829, username: "user_7432", email: "alice@gmail.com", ... }
+
+// Generate address for form testing
+const shippingAddress = genAddress();
+console.log(shippingAddress);
+// Output: { street: "123 Main St", city: "Springfield", state: "CA", ... }
+
+// Generate product catalog
+const products = Array.from({ length: 10 }, () => genProduct());
+
+// Generate random test data
+const randomTestData = Array.from({ length: 5 }, () => genRandomExample());
+```
+
 ## Demos
 
 Run the included demos to see the library in action:

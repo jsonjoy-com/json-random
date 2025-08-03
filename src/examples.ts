@@ -1,5 +1,6 @@
 import type {Token} from './string';
 import type {StringTemplate, Template, ObjectTemplate, ArrayTemplate, MapTemplate} from './structured/types';
+import {TemplateJson} from './structured/TemplateJson';
 
 // ============================================================================
 // String Pattern Templates (from README examples)
@@ -1088,6 +1089,143 @@ export const allExamples: Template = [
   performanceTest,
   mixedTypes,
   loadTestUser,
-  tree(),
-  comment(),
+  tree,
+  comment,
 ];
+
+// ============================================================================
+// Helper Methods for Easy Random JSON Generation
+// ============================================================================
+
+/**
+ * Generate a random user profile with comprehensive details.
+ * @returns Random user profile object
+ */
+export const genUser = () => TemplateJson.gen(userProfile);
+
+/**
+ * Generate a basic user object with essential information.
+ * @returns Random basic user object
+ */
+export const genUserBasic = () => TemplateJson.gen(userBasic);
+
+/**
+ * Generate a random address object with street, city, state, etc.
+ * @returns Random address object
+ */
+export const genAddress = () => TemplateJson.gen(address);
+
+/**
+ * Generate a random product with details like name, price, category.
+ * @returns Random product object
+ */
+export const genProduct = () => TemplateJson.gen(product);
+
+/**
+ * Generate a random order with items, customer info, and totals.
+ * @returns Random order object
+ */
+export const genOrder = () => TemplateJson.gen(order);
+
+/**
+ * Generate a random financial transaction.
+ * @returns Random transaction object
+ */
+export const genTransaction = () => TemplateJson.gen(transaction);
+
+/**
+ * Generate a random bank account information.
+ * @returns Random bank account object
+ */
+export const genBankAccount = () => TemplateJson.gen(bankAccount);
+
+/**
+ * Generate a random social media post.
+ * @returns Random social post object
+ */
+export const genSocialPost = () => TemplateJson.gen(socialPost);
+
+/**
+ * Generate a random social media profile.
+ * @returns Random social profile object
+ */
+export const genSocialProfile = () => TemplateJson.gen(socialProfile);
+
+/**
+ * Generate a random location with coordinates and details.
+ * @returns Random location object
+ */
+export const genLocation = () => TemplateJson.gen(location);
+
+/**
+ * Generate a random API response with data array.
+ * @returns Random API response object
+ */
+export const genApiResponse = () => TemplateJson.gen(apiResponse);
+
+/**
+ * Generate a detailed API response with comprehensive metadata.
+ * @returns Random detailed API response object
+ */
+export const genApiResponseDetailed = () => TemplateJson.gen(apiResponseDetailed);
+
+/**
+ * Generate a random service configuration.
+ * @returns Random service config object
+ */
+export const genServiceConfig = () => TemplateJson.gen(serviceConfig);
+
+/**
+ * Generate a random medical patient record.
+ * @returns Random patient object
+ */
+export const genPatient = () => TemplateJson.gen(patient);
+
+/**
+ * Generate a comprehensive medical record.
+ * @returns Random medical record object
+ */
+export const genMedicalRecord = () => TemplateJson.gen(medicalRecord);
+
+/**
+ * Generate a random student profile.
+ * @returns Random student object
+ */
+export const genStudent = () => TemplateJson.gen(student);
+
+/**
+ * Generate a random course information.
+ * @returns Random course object
+ */
+export const genCourse = () => TemplateJson.gen(course);
+
+/**
+ * Generate a random IoT sensor reading.
+ * @returns Random sensor reading object
+ */
+export const genSensorReading = () => TemplateJson.gen(sensorReading);
+
+/**
+ * Generate a random IoT device profile.
+ * @returns Random IoT device object
+ */
+export const genIotDevice = () => TemplateJson.gen(iotDevice);
+
+/**
+ * Generate a random log entry for monitoring.
+ * @returns Random log entry object
+ */
+export const genLogEntry = () => TemplateJson.gen(logEntry);
+
+/**
+ * Generate random metric data for monitoring.
+ * @returns Random metric data object
+ */
+export const genMetricData = () => TemplateJson.gen(metricData);
+
+/**
+ * Generate a random example from any of the available templates.
+ * Uses the 'or' pattern to randomly select from all templates.
+ * @returns Random example data from any template
+ */
+export const genRandomExample = () => TemplateJson.gen(allExamples);
